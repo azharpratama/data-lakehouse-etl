@@ -4,11 +4,13 @@ from db_config import STAGING_DB_URI, DW_DB_URI
 
 # Tables to load from staging to data warehouse in order of dependencies
 TABLES_TO_LOAD = [
-    "stg_dim_person",
-    "stg_dim_customer", 
-    "stg_dim_product",
     "stg_dim_date",
-    "stg_fact_sales"
+    "stg_dim_territory", 
+    "stg_dim_department",
+    "stg_dim_employee",
+    "stg_fact_sales",
+    "stg_fact_employee_tenure",
+    "stg_fact_headcount"
 ]
 
 # Target table names in data warehouse (removing 'stg_' prefix)
@@ -17,61 +19,65 @@ def get_target_name(staging_name):
 
 # SQL to create tables with proper primary and foreign keys
 CREATE_TABLE_SQL = {
-    "dim_person": """
-        CREATE TABLE IF NOT EXISTS dim_person (
-            businessentityid INTEGER PRIMARY KEY,
-            firstname VARCHAR(50),
-            lastname VARCHAR(50)
-        )
-    """,
-    "dim_customer": """
-        CREATE TABLE IF NOT EXISTS dim_customer (
-            customerid INTEGER PRIMARY KEY,
-            personid INTEGER,
-            storeid INTEGER, 
-            territoryid INTEGER,
-            customer_name VARCHAR(100),
-            FOREIGN KEY (personid) REFERENCES dim_person(businessentityid)
-        )
-    """,
-    "dim_product": """
-        CREATE TABLE IF NOT EXISTS dim_product (
-            productid INTEGER PRIMARY KEY,
-            product_name VARCHAR(100),
-            productnumber VARCHAR(25),
-            standardcost NUMERIC(19,4),
-            listprice NUMERIC(19,4),
-            margin NUMERIC(19,4)
-        )
-    """,
     "dim_date": """
         CREATE TABLE IF NOT EXISTS dim_date (
-            date_id VARCHAR(8) PRIMARY KEY,
+            date_id INTEGER PRIMARY KEY,
             full_date DATE,
-            year INTEGER,
-            quarter INTEGER,
-            month INTEGER,
-            month_name VARCHAR(9),
             day INTEGER,
-            day_of_week INTEGER,
-            day_name VARCHAR(9)
+            month INTEGER,
+            quarter INTEGER,
+            year INTEGER
+        )
+    """,
+    "dim_territory": """
+        CREATE TABLE IF NOT EXISTS dim_territory (
+            territory_id INTEGER PRIMARY KEY,
+            territory_name VARCHAR(100),
+            region VARCHAR(100)
+        )
+    """,
+    "dim_department": """
+        CREATE TABLE IF NOT EXISTS dim_department (
+            department_id INTEGER PRIMARY KEY,
+            department_name VARCHAR(100)
+        )
+    """,
+    "dim_employee": """
+        CREATE TABLE IF NOT EXISTS dim_employee (
+            employee_id INTEGER PRIMARY KEY,
+            first_name VARCHAR(100),
+            last_name VARCHAR(100),
+            gender VARCHAR(10)
         )
     """,
     "fact_sales": """
         CREATE TABLE IF NOT EXISTS fact_sales (
-            salesorderid INTEGER,
-            date_id VARCHAR(8),
-            orderdate DATE,
-            customerid INTEGER,
-            productid INTEGER,
-            orderqty INTEGER,
-            unitprice NUMERIC(19,4),
-            lineitemtotal NUMERIC(19,4),
-            totaldue NUMERIC(19,4),
-            PRIMARY KEY (salesorderid, productid),
-            FOREIGN KEY (date_id) REFERENCES dim_date(date_id),
-            FOREIGN KEY (customerid) REFERENCES dim_customer(customerid),
-            FOREIGN KEY (productid) REFERENCES dim_product(productid)
+            sales_id INTEGER PRIMARY KEY,
+            territory_id INTEGER,
+            date_id INTEGER,
+            sale_amount DECIMAL(18,2),
+            FOREIGN KEY (territory_id) REFERENCES dim_territory(territory_id),
+            FOREIGN KEY (date_id) REFERENCES dim_date(date_id)
+        )
+    """,
+    "fact_employee_tenure": """
+        CREATE TABLE IF NOT EXISTS fact_employee_tenure (
+            employee_id INTEGER,
+            hire_date DATE,
+            snapshot_date DATE,
+            tenure_years INTEGER,
+            PRIMARY KEY (employee_id),
+            FOREIGN KEY (employee_id) REFERENCES dim_employee(employee_id)
+        )
+    """,
+    "fact_headcount": """
+        CREATE TABLE IF NOT EXISTS fact_headcount (
+            department_id INTEGER,
+            date_id INTEGER,
+            employee_count INTEGER,
+            PRIMARY KEY (department_id, date_id),
+            FOREIGN KEY (department_id) REFERENCES dim_department(department_id),
+            FOREIGN KEY (date_id) REFERENCES dim_date(date_id)
         )
     """
 }
