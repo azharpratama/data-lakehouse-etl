@@ -53,6 +53,31 @@ python transform.py
 python load.py
 ```
 
+### Option 4: Scheduled Execution with Cron
+
+The ETL pipeline can be scheduled to run automatically using cron jobs:
+
+1. Make sure the scripts are executable:
+   ```bash
+   chmod +x run.sh cron_etl.sh
+   ```
+
+2. Edit your crontab:
+   ```bash
+   crontab -e
+   ```
+
+3. Add a scheduling pattern (examples):
+   ```
+   # Run daily at midnight
+   0 0 * * * /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+   
+   # Run every Monday at 2 AM
+   0 2 * * 1 /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+   ```
+
+See `crontab_examples.txt` for more scheduling patterns including short intervals for demonstration purposes.
+
 ## Database Connection Configuration
 
 Database connection strings are defined in `.env` file and loaded by `db_config.py`.

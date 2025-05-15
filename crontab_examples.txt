@@ -1,0 +1,18 @@
+# Sample crontab entries for ETL pipeline
+
+# ==== PRODUCTION SCHEDULE EXAMPLES ====
+
+# Run ETL daily at midnight
+0 0 * * * /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+
+# Run ETL every Monday at 2 AM
+0 2 * * 1 /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+
+# Run ETL every hour during business hours (8 AM to 6 PM) on weekdays
+0 8-18 * * 1-5 /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+
+# Run ETL at the beginning of each month
+0 0 1 * * /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
+
+# Run ETL process every minute (for quick demonstration)
+* * * * * /Users/azhar/Developer/data-lakehouse-etl/cron_etl.sh
